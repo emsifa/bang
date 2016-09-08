@@ -22,8 +22,8 @@ require(__DIR__.'/app/helper.php');
 // Set Configs
 // ------------------------------------------------------
 config([
-    'module_path'       => __DIR__.'/app/module',
-    'template_path'     => __DIR__.'/app/template',
+    'path.module'       => __DIR__.'/app/module',
+    'path.template'     => __DIR__.'/app/template',
     'default_module'    => 'welcome',
     'template'          => 'layout.php',
 ]);
@@ -53,7 +53,7 @@ try {
             if ( $template ) {
                 $content = $output;
                 ob_start();
-                include(config('template_path').'/'.$template);
+                include(config('path.template').'/'.$template);
                 $output = ob_get_clean();
             }
             break;

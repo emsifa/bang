@@ -9,7 +9,7 @@
 
 function module_path($module) {
     $filename = str_replace('.', '/', $module) . '.php';
-    return config('module_path').'/'.$filename;
+    return config('path.module').'/'.$filename;
 }
 
 
