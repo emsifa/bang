@@ -1,71 +1,66 @@
 <?php 
 
-// index.php : this is core file where any request on app should pointed to this file
-
 /**
 | =====================================================================================
 | SETUP / PREPARATION
 | =====================================================================================
-| load requirement files, setup configuration, initialize database, etc
+| load file yang dibutuhkan, set konfigurasi, dsb
 */
 
-// Some Preparations
+// Persiapkan beberapa hal mendasar
 // ------------------------------------------------------
-session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Load Requirement Files
+// Load file-file yang dibutuhkan
 // ------------------------------------------------------
 require(__DIR__.'/app/helper.php');
 
-// Set Configs
+// Set konfigurasi
 // ------------------------------------------------------
 config([
+    // konfigurasi utama aplikasi
     'path.module'       => __DIR__.'/app/module',
     'path.template'     => __DIR__.'/app/template',
     'default_module'    => 'welcome',
     'template'          => 'layout.php',
+
+    // konfigurasi database
+    'database.username' => 'emsifa',
+    'database.password' => 'emsifa',
+    'database.name'     => 'db_indra',
 ]);
 
 /**
 | =====================================================================================
 | HANDLING REQUEST
 | =====================================================================================
-| handling request and print final output.
-| For many cases, you don't need to edit code belows
+| handle request dan menampilkan output final.
+| Untuk banyak kasus, kamu tidak perlu mengubah kode dibawah ini
 */
-
 try {
+    // mengambil module yang di akses
     $module = get_request_path() ?: config('default_module');
+    // jalankan module
     $output = call_module($module);
 
-    // handle output types, in some case you may add/modify this
-    switch ( strtoupper(gettype($output)) ) {
-        case 'ARRAY': 
-        case 'OBJECT':
-            header('Content-Type: application/json');
-            $output = json_encode($output); 
-            break;
-
-        case 'STRING':
-            $template = config('template');
-            if ( $template ) {
-                $content = $output;
-                ob_start();
-                include(config('path.template').'/'.$template);
-                $output = ob_get_clean();
-            }
-            break;
+    // jika $output berupa array/object, kirim response JSON 
+    if (is_array($output)) {
+        response_json($output); 
     }
+
+    $template = config('template');
+    // masukkan $output kedalam template (jika diset pada config)
+    if ($template) {
+        $content = $output;
+        ob_start();
+        include(config('path.template').'/'.$template);
+        $output = ob_get_clean();
+    }
+
+    echo (string) $output;
 } catch (Exception $e) {
     $message = $e->getMessage();
     $code = $e->getCode();
-    if ($code < 100 OR $code > 599) {
-        $code = 500;
-    }
-    http_response_code($code);
-    $output = "<h4>Error {$code}</h4>{$message}";    
+    abort($message, $code);
 }
-
-echo (string) $output;
