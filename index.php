@@ -1,33 +1,5 @@
 <?php 
 
-// index.php : this is core file where any request on app should pointed to this file
-
-/**
-| =====================================================================================
-| SETUP / PREPARATION
-| =====================================================================================
-| load requirement files, setup configuration, initialize database, etc
-*/
-
-// Some Preparations
-// ------------------------------------------------------
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Load Requirement Files
-// ------------------------------------------------------
-require(__DIR__.'/app/helper.php');
-
-// Set Configs
-// ------------------------------------------------------
-config([
-    'path.module'       => __DIR__.'/app/module',
-    'path.template'     => __DIR__.'/app/template',
-    'default_module'    => 'welcome',
-    'template'          => 'layout.php',
-]);
-
 /**
 | =====================================================================================
 | HANDLING REQUEST
@@ -36,6 +8,9 @@ config([
 | For many cases, you don't need to edit code belows
 */
 
+// Bootstraping application
+require(__DIR__.'/src/app.php');
+
 try {
     $module = get_request_path() ?: config('default_module');
     $output = call_module($module);
@@ -43,20 +18,26 @@ try {
     // handle output types, in some case you may add/modify this
     switch ( strtoupper(gettype($output)) ) {
         case 'ARRAY': 
-        case 'OBJECT':
+        case 'OBJECT': {
             header('Content-Type: application/json');
             $output = json_encode($output); 
             break;
+        }
 
-        case 'STRING':
+        case 'STRING': {
             $template = config('template');
             if ( $template ) {
+                list($output, $blocks) = parse_blocks($output);
+                foreach($blocks as $block => $block_content) {
+                    block($block, $block_content);
+                }
                 $content = $output;
                 ob_start();
                 include(config('path.template').'/'.$template);
                 $output = ob_get_clean();
             }
             break;
+        }
     }
 } catch (Exception $e) {
     $message = $e->getMessage();
