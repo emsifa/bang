@@ -1,0 +1,1 @@
+HELLO <?= uri_segment(-1) ?>

@@ -40,7 +40,7 @@ function redirect($url, array $params = []) {
  *
  * @return string
  */
-function get_request_path() {
+function request_path() {
     if ( array_key_exists('PATH_INFO', $_SERVER) ) {
         $uri = $_SERVER['PATH_INFO'];
     } else {
@@ -49,5 +49,34 @@ function get_request_path() {
         $uri = preg_replace("#^".$file."#", '', $self);
     }
 
-    return ltrim($uri, '/');
+    return trim($uri, '/');
+}
+
+/**
+ * Get request method
+ *
+ * @return string
+ */
+function request_method() {
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method == 'POST' && input('_method')) {
+        return input('_method');
+    } else {
+        return $method;
+    }
+}
+
+/** 
+ * Get uri segment
+ *
+ * @param int $index
+ * @return string
+ */
+function uri_segment($index) {
+    $segments = explode('/', request_path());
+    if ($index < 0) {
+        $index = count($segments) + $index;
+    }
+
+    return isset($segments[$index]) ? $segments[$index] : null;
 }

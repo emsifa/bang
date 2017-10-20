@@ -12,8 +12,9 @@
 require(__DIR__.'/src/app.php');
 
 try {
-    $module = get_request_path() ?: config('default_module');
-    $output = call_module($module);
+    $method = request_method();
+    $module = request_path() ?: config('default_module');
+    $output = call_module($method, $module);
 
     // handle output types, in some case you may add/modify this
     switch ( strtoupper(gettype($output)) ) {
