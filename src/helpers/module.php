@@ -109,8 +109,7 @@ function find_module($method, $uri, array $options = []) {
  * @return bool
  */
 function has_module($method, $module, array $options = []) {
-    $find_module = find_module($method, $module, $options);
-    return (file_exists($find_module) AND is_file($find_module));
+    return !is_null(find_module($method, $module, $options));
 }
 
 /**
