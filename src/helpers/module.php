@@ -38,55 +38,68 @@ function find_module($method, $uri, array $options = []) {
     $segments = explode('/', $uri);
     $path = rtrim($options['base_dir'], '/');
     $n = count($segments);
-    while ($segment = array_shift($segments)) {
-        $next_path = "{$path}/{$segment}";
-        $is_last = (count($segments) == 0);
 
-        if (!$is_last && is_dir($next_path)) {
-            $path = $next_path;
-            continue;
-        }
-
-        if ($is_last) {
-            foreach ([
+    $segment_file = function ($path, $segment, $last = false) use (
+        &$method, 
+        &$extension, 
+        &$matchers, 
+        &$param_prefix, 
+        &$param_suffix,
+        &$index,
+        &$index_file
+    ) {
+        $segment_dir = "{$path}/{$segment}";
+        if ($last) {
+            $filepaths = [
                 "{$path}/{$method}({$segment}).{$extension}",
-                "{$next_path}.{$extension}",
-                "{$next_path}/{$method}({$index}).{$extension}",
-                "{$next_path}/{$index_file}"
-            ] as $filepath) {
-                if (is_file($filepath)) {
-                    return $filepath;                
-                }
-            }
+                "{$segment_dir}.{$extension}",
+                "{$segment_dir}/{$method}({$index}).{$extension}",
+                "{$segment_dir}/{$index_file}"
+            ];
+        } else {
+            $filepaths = [
+                "{$segment_dir}"
+            ];
         }
 
-        $result = null;
+        foreach ($filepaths as $filepath) {
+            if (file_exists($filepath)) return $filepath;
+        }
+
+        // Find dynamic path
         foreach ($matchers as $key => $regex) {
             $match = (bool) preg_match($regex, $segment);
             if (!$match) continue;
 
             $key_segment = "{$param_prefix}{$key}{$param_suffix}";
-            $next_path = "{$path}/{$key_segment}";
-            if (!$is_last && is_dir($next_path)) {
-                $next_uri = implode("/", $segments);
-                if ($result = find_module($method, $next_uri, array_merge($options, ['base_dir' => $next_path]))) {
-                    return $result;
-                }
-            } elseif($is_last) {
-                $files = [
+            $segment_path = "{$path}/{$key_segment}";
+            if ($last) {
+                $filepaths = [
                     "{$path}/{$method}($key_segment).{$extension}",
-                    "{$next_path}.{$extension}",
-                    "{$next_path}/{$method}({$index}).{$extension}",
-                    "{$next_path}/{$index_file}",
+                    "{$segment_path}.{$extension}",
+                    "{$segment_path}/{$method}({$index}).{$extension}",
+                    "{$segment_path}/{$index_file}",
                 ];
-                foreach ($files as $file) {
-                    if (is_file($file)) {
-                        return $file;
-                    }
-                }
+            } else {
+                $filepaths = [$segment_path];
+            }
+
+            foreach ($filepaths as $filepath) {
+                if (file_exists($filepath)) return $filepath;
             }
         }
+
+        return null;
+    };
+
+    while ($segment = array_shift($segments)) {
+        $is_last = count($segments) === 0;
+        $path = $segment_file($path, $segment, $is_last);
+        if (!$path) {
+            return null;
+        }
     }
+    return $path;
 }
 
 /**
