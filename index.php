@@ -13,8 +13,8 @@ require(__DIR__.'/src/app.php');
 
 try {
     $method = request_method();
-    $module = request_path() ?: config('default_module');
-    $output = call_module($method, $module);
+    $route  = request_path() ?: config('index_route');
+    $output = call_route($method, $route);
 
     // handle output types, in some case you may add/modify this
     switch ( strtoupper(gettype($output)) ) {
@@ -34,7 +34,7 @@ try {
                 }
                 $content = $output;
                 ob_start();
-                include(config('path.template').'/'.$template);
+                include(config('path.templates').'/'.$template);
                 $output = ob_get_clean();
             }
             break;

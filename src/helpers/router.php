@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Get module file path
+ * Get route file path
  *
  * @param string $uri
  * @param array $options
  * @return string|null
  */
-function find_module($method, $uri, array $options = []) {
+function find_route($method, $uri, array $options = []) {
     $method = strtolower($method);
     if ($method == 'head') {
         $method = 'get';
@@ -16,7 +16,7 @@ function find_module($method, $uri, array $options = []) {
     $uri = trim($uri, '/');
     $options = array_merge([
         'index' => 'index',
-        'base_dir' => config('path.module'),
+        'base_dir' => config('path.routes'),
         'extension' => 'php',
         'param_prefix' => '_',
         'param_suffix' => '_',
@@ -103,29 +103,29 @@ function find_module($method, $uri, array $options = []) {
 }
 
 /**
- * Check wether module exists or not
+ * Check wether route exists or not
  *
- * @param string $module
+ * @param string $route
  * @return bool
  */
-function has_module($method, $module, array $options = []) {
-    return !is_null(find_module($method, $module, $options));
+function has_route($method, $route, array $options = []) {
+    return !is_null(find_route($method, $route, $options));
 }
 
 /**
- * Call module
+ * Call route
  *
- * @param string $module
+ * @param string $route
  * @return mixed
  */
-function call_module($method, $module_uri, array $options = []) {
-    $module_file = find_module($method, $module_uri, $options);
-    if ( ! $module_file ) {
-        throw new \Exception("Module {$module_uri} tidak tersedia", 404);
+function call_route($method, $route_uri, array $options = []) {
+    $route_file = find_route($method, $route_uri, $options);
+    if ( ! $route_file ) {
+        throw new \Exception("Route {$route_uri} is not available.", 404);
     }
 
     ob_start();
-    $returned = require($module_file);
+    $returned = require($route_file);
     $output = ob_get_clean();
 
     return !is_int($returned)? $returned : $output ?: null;

@@ -16,18 +16,18 @@ function base_url($path = null) {
 }
 
 /**
- * Get url to module
+ * Get url to route
  * 
- * @param string $module
+ * @param string $route
  * @param array $params
  * @return string
  */
-function module_url($module, array $params = array()) {
+function route_url($route, array $params = array()) {
     $params = http_build_query($params);
     $query_string = ($params? '?'.$params : '');
     if ($index_file = config('index_file')) {
-        return base_url($index_file.'/'.$module) . $query_string;
+        return base_url($index_file.'/'.$route) . $query_string;
     } else {
-        return base_url($module) . $query_string;
+        return base_url($route) . $query_string;
     }
 }
