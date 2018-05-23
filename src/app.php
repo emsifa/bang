@@ -13,19 +13,20 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Load Requirement Files
+// Load Application Helpers
 // ------------------------------------------------------
-require(__DIR__.'/helpers/router.php');
-require(__DIR__.'/helpers/url.php');
-require(__DIR__.'/helpers/config.php');
-require(__DIR__.'/helpers/block.php');
-require(__DIR__.'/helpers/utils.php');
+$helpers = [
+    'middleware',
+    'router',
+    'url',
+    'config',
+    'block',
+    'utils'
+];
+foreach ($helpers as $helper) {
+    require(__DIR__ . '/helpers/'. $helper .'.php');
+}
 
 // Set Configurations
 // ------------------------------------------------------
-config([
-    'path.routes'       => __DIR__.'/routes',
-    'path.templates'    => __DIR__.'/templates',
-    'index_route'       => 'welcome',
-    'template'          => 'layout.php',
-]);
+config(require(__DIR__.'/configs.php'));

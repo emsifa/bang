@@ -12,7 +12,7 @@ function find_route($method, $uri, array $options = []) {
     if ($method == 'head') {
         $method = 'get';
     }
-    
+
     $uri = trim($uri, '/');
     $options = array_merge([
         'index' => 'index',
@@ -40,10 +40,10 @@ function find_route($method, $uri, array $options = []) {
     $n = count($segments);
 
     $segment_file = function ($path, $segment, $last = false) use (
-        &$method, 
-        &$extension, 
-        &$matchers, 
-        &$param_prefix, 
+        &$method,
+        &$extension,
+        &$matchers,
+        &$param_prefix,
         &$param_suffix,
         &$index,
         &$index_file
@@ -124,9 +124,12 @@ function call_route($method, $route_uri, array $options = []) {
         throw new \Exception("Route {$route_uri} is not available.", 404);
     }
 
-    ob_start();
-    $returned = require($route_file);
-    $output = ob_get_clean();
+    $output = middleware_before($route_file);
+    if (!$output) {
+        ob_start();
+        $output = require($route_file);
+        $output = middleware_after($route_file, ob_get_clean());
+    }
 
-    return !is_int($returned)? $returned : $output ?: null;
+    return $output ?: null;
 }
