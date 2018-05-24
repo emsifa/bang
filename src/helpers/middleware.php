@@ -54,7 +54,7 @@ function middleware_before($route_file) {
     foreach ($middlewares as $middleware) {
         $route_path = ltrim(dirname(str_replace($routes_path, '', $middleware)), '/');
         $namespace = $route_path ? "routes\\" . str_replace('/', "\\", $route_path) : "routes";
-        $callback = $namespace . "\\before";
+        $callback = $namespace . '\\before';
         if (function_exists($callback)) {
             $output = call_user_func($callback);
             if ($output) {
@@ -72,7 +72,7 @@ function middleware_after($route_file, $output) {
 
     foreach ($middlewares as $middleware) {
         $route_path = ltrim(dirname(str_replace($routes_path, '', $middleware)), '/');
-        $namespace = 'routes\\' . str_replace('/', "\\", $route_path);
+        $namespace = $route_path ? 'routes\\' . str_replace('/', "\\", $route_path) : 'routes';
         $callback = $namespace . '\\after';
 
         if (function_exists($callback)) {
