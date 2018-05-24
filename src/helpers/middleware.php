@@ -14,7 +14,7 @@ function get_middlewares($route_file) {
 
         $routes_path = config('path.routes');
         $route_path = trim(str_replace($routes_path, '', $route_dir), '/');
-        $segments = explode('/', $route_path);
+        $segments = $route_path ? explode('/', $route_path) : [];
         $path = $routes_path;
         if (is_file($path . '/_.php')) {
             $middlewares[$route_dir][] = $path . '/_.php';
@@ -39,7 +39,7 @@ function load_middlewares($route_file) {
     if (!is_array($loadeds) || !in_array($route_dir, $loadeds)) {
         $middlewares = get_middlewares($route_file);
         foreach ($middlewares as $middleware) {
-            require($middleware);
+            require_once($middleware);
         }
         $loadeds[] = $route_dir;
     }
@@ -53,8 +53,8 @@ function middleware_before($route_file) {
 
     foreach ($middlewares as $middleware) {
         $route_path = ltrim(dirname(str_replace($routes_path, '', $middleware)), '/');
-        $namespace = 'routes\\' . str_replace('/', "\\", $route_path);
-        $callback = $namespace . '\\before';
+        $namespace = $route_path ? "routes\\" . str_replace('/', "\\", $route_path) : "routes";
+        $callback = $namespace . "\\before";
         if (function_exists($callback)) {
             $output = call_user_func($callback);
             if ($output) {
